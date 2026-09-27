@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="ru" class="h-full bg-slate-900">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ЭлектроМонтаж — Учебный портал и Лектории</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            amber: {
+              400: '#f59e0b',
+              500: '#d97706',
+              600: '#b45309',
+            },
+            slate: {
+              850: '#131d31',
+              900: '#0f172a',
+              950: '#080d1a',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    code, pre {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #f59e0b;
+    }
+  </style>
+</head>
+<body class="h-full text-slate-200 flex flex-col antialiased selection:bg-amber-500 selection:text-slate-900">
+
+  <!-- Top Navigation Header -->
+  <header class="bg-slate-950 border-b border-slate-800 sticky top-0 z-30 flex-shrink-0">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Logo & Title -->
+      <div class="flex items-center space-x-3 cursor-pointer" onclick="showCatalogView()">
+        <div class="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/40 flex items-center justify-center text-amber-400 font-bold text-xl shadow-lg shadow-amber-500/10">
+          <i class="fa-solid font-bolt fa-bolt"></i>
+        </div>
+        <div>
+          <span class="text-lg font-bold tracking-tight text-white block leading-tight">Электро<span class="text-amber-400">Монтаж</span></span>
+          <span class="text-xs text-slate-400 block font-medium">Курс & Лекторий</span>
+        </div>
+      </div>
+
+      <!-- Quick Actions & Stats -->
+      <div class="flex items-center space-x-3 sm:space-x-4">
+        <!-- Progress Indicator Button -->
+        <div class="hidden sm:flex items-center bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-xs">
+          <i class="fa-solid fa-graduation-cap text-amber-400 mr-2"></i>
+          <span class="text-slate-400 mr-2">Прогресс:</span>
+          <span id="global-progress-text" class="font-bold text-white">0 / 0</span>
+          <div class="w-20 bg-slate-800 h-2 rounded-full ml-2 overflow-hidden border border-slate-700">
+            <div id="global-progress-bar" class="bg-amber-400 h-full w-0 transition-all duration-300"></div>
+          </div>
+        </div>
+
+        <!-- Add Lecture Button -->
+        <button onclick="openAddModal()" class="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg bg-amber-500 text-slate-950 hover:bg-amber-400 transition font-semibold text-xs sm:text-sm shadow-md shadow-amber-500/20 active:scale-95">
+          <i class="fa-solid fa-plus mr-1.5"></i>
+          <span>Добавить лекцию</span>
+        </button>
+
+        <!-- GitHub Instructions Button -->
+        <button onclick="openGithubModal()" class="inline-flex items-center px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 transition font-medium text-xs sm:text-sm active:scale-95">
+          <i class="fa-brands fa-github text-amber-400 mr-2"></i>
+          <span class="hidden md:inline">Экспорт на GitHub</span>
+          <span class="md:hidden">GitHub</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="flex-1 flex flex-col md:flex-row overflow-hidden max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 gap-6">
+
+    <!-- Sidebar: Filters & Categories -->
+    <aside class="w-full md:w-80 flex-shrink-0 flex flex-col gap-4">
+      
+      <!-- Search Input -->
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+        <input type="text" id="search-input" oninput="filterLectures()" placeholder="Поиск по названию или теме..." class="w-full bg-slate-950 text-slate-200 text-sm rounded-xl pl-10 pr-4 py-2.5 border border-slate-800 focus:outline-none focus:border-amber-500 transition placeholder-slate-500">
+      </div>
+
+      <!-- Categories & Filters Panel -->
+      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex flex-col gap-3">
+        <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+          <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center">
+            <i class="fa-solid fa-layer-group text-amber-400 mr-2"></i> Категории
+          </h3>
+          <span id="lectures-count-badge" class="text-xs font-semibold bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full">0</span>
+        </div>
+
+        <nav id="category-filters" class="flex flex-col space-y-1 text-sm">
+          <!-- Dynamic Category List will be populated here -->
+        </nav>
+      </div>
+
+      <!-- Data Import/Export Quick Tools -->
+      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex flex-col gap-2.5">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center">
+          <i class="fa-solid fa-database text-amber-400 mr-2"></i> Управление базой
+        </h3>
+        <p class="text-xs text-slate-400">Вы можете сохранить все лекции в файл JSON для переноса в проект GitHub.</p>
+        
+        <div class="grid grid-cols-2 gap-2 mt-1">
+          <button onclick="exportLecturesJSON()" class="flex items-center justify-center space-x-1.5 py-2 px-3 bg-slate-900 hover:bg-slate-800 border border-slate-700/80 rounded-lg text-xs font-medium text-slate-200 transition">
+            <i class="fa-solid fa-download text-amber-400"></i>
+            <span>Скачать JSON</span>
+          </button>
+          
+          <label class="flex items-center justify-center space-x-1.5 py-2 px-3 bg-slate-900 hover:bg-slate-800 border border-slate-700/80 rounded-lg text-xs font-medium text-slate-200 transition cursor-pointer">
+            <i class="fa-solid fa-upload text-amber-400"></i>
+            <span>Загрузить</span>
+            <input type="file" id="import-file-input" accept=".json" onchange="importLecturesJSON(event)" class="hidden">
+          </label>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Dynamic Content Workspace -->
+    <main class="flex-1 min-w-0 flex flex-col bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden relative">
+      
+      <!-- Catalog View -->
+      <div id="catalog-view" class="p-6 overflow-y-auto h-full flex flex-col">
+        <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
+          <div>
+            <h1 class="text-xl sm:text-2xl font-bold text-white tracking-tight flex items-center">
+              <i class="fa-solid fa-book-open text-amber-400 mr-3"></i> Список Лекций
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-400 mt-1">Выберите лекцию для изучения теории и прохождения итогового теста.</p>
+          </div>
+        </div>
+
+        <!-- Lecture Grid Container -->
+        <div id="lectures-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <!-- Dynamic Lecture Cards inserted here -->
+        </div>
+
+        <!-- Empty State Message -->
+        <div id="empty-state" class="hidden flex-1 flex flex-col items-center justify-center text-center p-8">
+          <div class="w-16 h-16 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-500 mb-4 text-2xl">
+            <i class="fa-solid fa-folder-open"></i>
+          </div>
+          <h3 class="text-base font-semibold text-slate-300">Лекции не найдены</h3>
+          <p class="text-xs text-slate-500 max-w-sm mt-1">Попробуйте изменить поисковый запрос или создайте новую лекцию через кнопу вверху.</p>
+        </div>
+      </div>
+
+      <!-- Reader View (Initially Hidden) -->
+      <div id="reader-view" class="hidden flex-col h-full overflow-hidden bg-slate-950">
+        <!-- Top Toolbar -->
+        <div class="p-4 border-b border-slate-800 bg-slate-900/60 flex items-center justify-between flex-shrink-0">
+          <button onclick="showCatalogView()" class="inline-flex items-center text-xs font-semibold text-slate-300 hover:text-amber-400 transition bg-slate-800/80 hover:bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700">
+            <i class="fa-solid fa-arrow-left mr-2"></i> К каталогу лекций
+          </button>
+          
+          <div class="flex items-center space-x-2">
+            <button id="toggle-complete-btn" onclick="toggleCurrentLectureComplete()" class="inline-flex items-center text-xs font-medium px-3 py-1.5 rounded-lg border transition">
+              <!-- Content inserted via JS -->
+            </button>
+            
+            <button id="edit-current-lecture-btn" onclick="editCurrentLecture()" class="p-2 text-slate-400 hover:text-amber-400 hover:bg-slate-800 rounded-lg transition" title="Редактировать лекцию">
+              <i class="fa-solid fa-pen-to-square"></i>
+            </button>
+
+            <button id="delete-current-lecture-btn" onclick="deleteCurrentLecture()" class="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded-lg transition" title="Удалить лекцию">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Lecture Details & Reader Scroll Area -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-6">
+          
+          <!-- Metadata Header -->
+          <div>
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+              <span id="reader-category" class="bg-amber-500/10 text-amber-400 border border-amber-500/30 text-xs font-medium px-2.5 py-0.5 rounded-full">Категория</span>
+              <span id="reader-duration" class="text-slate-400 text-xs font-medium flex items-center">
+                <i class="fa-regular fa-clock mr-1"></i> 15 минут
+              </span>
+            </div>
+            <h1 id="reader-title" class="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-snug">Заголовок лекции</h1>
+          </div>
+
+          <!-- Key Takeaways Box -->
+          <div id="reader-takeaways-container" class="bg-slate-900 border border-amber-500/30 rounded-xl p-4 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-2 h-full bg-amber-500"></div>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-amber-400 mb-2 flex items-center">
+              <i class="fa-solid fa-lightbulb mr-2"></i> Ключевые тезисы лекции
+            </h4>
+            <ul id="reader-takeaways" class="text-xs sm:text-sm text-slate-300 space-y-1.5 list-disc list-inside">
+              <!-- Key Takeaways inserted here -->
+            </ul>
+          </div>
+
+          <!-- Main Lecture Body (Rich Content) -->
+          <div id="reader-content" class="prose prose-invert max-w-none text-slate-300 text-sm sm:text-base leading-relaxed space-y-4">
+            <!-- Article Body -->
+          </div>
+
+          <!-- Interactive Knowledge Check / Quiz Section -->
+          <div id="reader-quiz-container" class="mt-8 border-t border-slate-800 pt-6">
+            <h3 class="text-lg font-bold text-white mb-4 flex items-center">
+              <i class="fa-solid fa-clipboard-question text-amber-400 mr-2"></i> Проверка знаний по теме
+            </h3>
+            <div id="quiz-questions-list" class="space-y-4">
+              <!-- Quiz Items -->
+            </div>
+            <div class="mt-4 flex justify-end">
+              <button onclick="checkQuizAnswers()" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-sm rounded-xl transition shadow-lg shadow-amber-500/20 active:scale-95">
+                Проверить ответы
+              </button>
+            </div>
+            <div id="quiz-result-message" class="mt-4 p-4 rounded-xl hidden text-sm font-semibold"></div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- MODAL: Add/Edit Lecture -->
+  <div id="lecture-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden my-auto">
+      
+      <!-- Modal Header -->
+      <div class="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950">
+        <h3 id="modal-title" class="text-lg font-bold text-white flex items-center">
+          <i class="fa-solid fa-pen text-amber-400 mr-2"></i> Добавление лекции
+        </h3>
+        <button onclick="closeAddModal()" class="text-slate-400 hover:text-white p-1 transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body Form -->
+      <form id="lecture-form" onsubmit="saveLecture(event)" class="p-5 sm:p-6 space-y-4 overflow-y-auto text-sm flex-1">
+        <input type="hidden" id="form-lecture-id">
+
+        <!-- Title -->
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Название лекции *</label>
+          <input type="text" id="form-title" required placeholder="Например: 1. Правила безопасности при электромонтажных работах" class="w-full bg-slate-950 text-slate-100 rounded-lg px-3.5 py-2 border border-slate-800 focus:outline-none focus:border-amber-500">
+        </div>
+
+        <!-- Category & Duration Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Категория *</label>
+            <input type="text" id="form-category" required placeholder="Правила и безопасность" list="category-suggestions" class="w-full bg-slate-950 text-slate-100 rounded-lg px-3.5 py-2 border border-slate-800 focus:outline-none focus:border-amber-500">
+            <datalist id="category-suggestions">
+              <option value="Правила и безопасность"></option>
+              <option value="Расчеты и Электротехника"></option>
+              <option value="Схемы и Подключения"></option>
+              <option value="Инструменты и СИЗ"></option>
+            </datalist>
+          </div>
+
+          <div>
+            <label class="block text-xs font-medium text-slate-300 mb-1">Время на изучение (мин.) *</label>
+            <input type="number" id="form-duration" required min="1" max="300" placeholder="15" class="w-full bg-slate-950 text-slate-100 rounded-lg px-3.5 py-2 border border-slate-800 focus:outline-none focus:border-amber-500">
+          </div>
+        </div>
+
+        <!-- Key Takeaways -->
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Ключевые тезисы (по одному на строку)</label>
+          <textarea id="form-takeaways" rows="2" placeholder="Всегда отключайте вводной автомат перед началом работ&#10;Проверяйте отсутствие напряжения указателем" class="w-full bg-slate-950 text-slate-100 rounded-lg px-3.5 py-2 border border-slate-800 focus:outline-none focus:border-amber-500"></textarea>
+        </div>
+
+        <!-- HTML Content -->
+        <div>
+          <label class="block text-xs font-medium text-slate-300 mb-1">Содержание лекции (поддерживает HTML разметку) *</label>
+          <textarea id="form-content" required rows="8" placeholder="<p>Текст лекции...</p><h3>Заголовок</h3><div class='bg-slate-900 border border-slate-800 p-4 rounded-lg my-3 font-mono text-xs'>Схема или пример</div>" class="w-full bg-slate-950 text-slate-100 rounded-lg px-3.5 py-2 border border-slate-800 focus:outline-none focus:border-amber-500 font-mono text-xs"></textarea>
+        </div>
+
+        <!-- Quiz Builder Section -->
+        <div class="border-t border-slate-800 pt-4 mt-2">
+          <div class="flex items-center justify-between mb-3">
+            <label class="block text-xs font-bold text-amber-400 uppercase tracking-wider">Вопросы для проверки знаний</label>
+            <button type="button" onclick="addQuizQuestionField()" class="text-xs font-semibold text-amber-400 hover:underline flex items-center">
+              <i class="fa-solid fa-plus mr-1"></i> Добавить вопрос
+            </button>
+          </div>
+          <div id="form-quiz-questions" class="space-y-4">
+            <!-- Dynamic quiz input fields will be generated here -->
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="border-t border-slate-800 pt-4 flex justify-end space-x-3">
+          <button type="button" onclick="closeAddModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-semibold transition">Отмена</button>
+          <button type="submit" class="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-lg text-xs font-bold transition shadow-md shadow-amber-500/20">Сохранить лекцию</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: GitHub Setup & Export Instructions -->
+  <div id="github-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden my-auto">
+      
+      <div class="p-4 sm:p-5 border-b border-slate-800 flex items-center justify-between bg-slate-950">
+        <h3 class="text-lg font-bold text-white flex items-center">
+          <i class="fa-brands fa-github text-amber-400 mr-2"></i> Публикация и развертывание на GitHub
+        </h3>
+        <button onclick="closeGithubModal()" class="text-slate-400 hover:text-white p-1 transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="p-5 sm:p-6 space-y-4 overflow-y-auto text-sm text-slate-300">
+        <p>Этот проект спроектирован так, чтобы его можно было в один клик опубликовать на <strong class="text-amber-400">GitHub Pages</strong> без серверов и сложной сборки.</p>
+        
+        <div class="space-y-3 border-t border-b border-slate-800 py-4">
+          <h4 class="font-bold text-white text-xs uppercase tracking-wider text-amber-400">Инструкция по шагам:</h4>
+          
+          <ol class="list-decimal list-inside space-y-2 text-xs leading-relaxed">
+            <li>Создайте новый публичный репозиторий на GitHub (например, <code class="bg-slate-950 text-amber-300 px-1.5 py-0.5 rounded border border-slate-800">electro-lectures</code>).</li>
+            <li>Скачайте файл с вашими лекциями через кнопку <span class="bg-slate-800 text-amber-400 px-2 py-0.5 rounded"><i class="fa-solid fa-download"></i> Скачать JSON</span> в боковой панели.</li>
+            <li>Поместите скачанный файл как <code class="bg-slate-950 text-amber-300 px-1.5 py-0.5 rounded border border-slate-800">lectures.json</code> рядом с главным <code class="bg-slate-950 text-amber-300 px-1.5 py-0.5 rounded border border-slate-800">index.html</code>.</li>
+            <li>Загрузите код на GitHub в ветку <code class="bg-slate-950 text-amber-300 px-1.5 py-0.5 rounded border border-slate-800">main</code>.</li>
+            <li>Перейдите в настройки репозитория: <strong>Settings -> Pages</strong>, выберите ветку <code class="bg-slate-950 text-amber-300 px-1.5 py-0.5 rounded border border-slate-800">main</code> и нажмите <strong>Save</strong>.</li>
+          </ol>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-white">Рекомендуемая структура файлов:</span>
+            <button onclick="copyToClipboard(document.getElementById('repo-structure').innerText)" class="text-xs text-amber-400 hover:underline">
+              <i class="fa-regular fa-copy mr-1"></i> Скопировать
+            </button>
+          </div>
+          <pre id="repo-structure" class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-slate-300 font-mono text-xs">
+electro-lectures/
+├── index.html         # Основное приложение
+├── lectures.json      # Загружаемый файл с лекциями
+└── README.md          # Описание вашего курса
+          </pre>
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <button onclick="closeGithubModal()" class="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs rounded-lg transition">
+            Понятно
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="fixed bottom-5 right-5 bg-slate-800 text-white border border-slate-700 px-4 py-3 rounded-xl shadow-2xl flex items-center space-x-3 transition-all duration-300 transform translate-y-20 opacity-0 z-50">
+    <i id="toast-icon" class="fa-solid fa-circle-check text-amber-400 text-lg"></i>
+    <span id="toast-message" class="text-xs font-medium">Уведомление</span>
+  </div>
+
+  <script>
+    // Initial Default Lectures Dataset
+    const initialLectures = [
+      {
+        id: "lec-1",
+        title: "1. Правила техники безопасности при электромонтаже",
+        category: "Правила и безопасность",
+        duration: 15,
+        takeaways: [
+          "Всегда проводите проверку отсутствия напряжения указателем (УНН).",
+          "Работайте только заземленным или диэлектрическим инструментом (до 1000 В).",
+          "Вывешивайте плакаты безопасности ('НЕ ВКЛЮЧАТЬ! РАБОТАЮТ ЛЮДИ')."
+        ],
+        content: `
+          <p class="text-slate-300">Техника безопасности — ключевой аспект электромонтажа. Соблюдение ПУЭ (Правил устройства электроустановок) и ПОТЭЭ (Правил охраны труда) предотвращает травматизм и поражение электрическим током.</p>
+          
+          <h3 class="text-lg font-bold text-amber-400 mt-4 mb-2">5 золотых правил безопасности:</h3>
+          <ol class="list-decimal list-inside space-y-2 text-slate-300 bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+            <li><strong>Отключить полностью:</strong> Извлечь предохранители или отключить автоматический выключатель.</li>
+            <li><strong>Предотвратить повторное включение:</strong> Заблокировать рычаги и вывесить предупреждающие таблички.</li>
+            <li><strong>Проверить отсутствие напряжения:</strong> Использовать двухполюсный указатель напряжения (проверив его испрвность накануне).</li>
+            <li><strong>Установить заземление:</strong> При работах на ВЛ или групповых щитах заземлить отключенные фазы.</li>
+            <li><strong>Оградить рабочее место:</strong> Закрыть доступ к смежным токоведущим частям, находящимся под напряжением.</li>
+          </ol>
+
+          <div class="bg-amber-500/10 border-l-4 border-amber-500 p-4 rounded-r-xl my-4">
+            <p class="text-xs text-amber-300 font-semibold uppercase tracking-wide">Важно знать:</p>
+            <p class="text-sm text-slate-300 mt-1">Никогда не надейтесь на индикаторную отвертку с неоновой лампой при принятии решения о безопасности — используйте только поверенные указатели напряжения!</p>
+          </div>
+        `,
+        completed: false,
+        quiz: [
+          {
+            question: "Какой прибор гарантированно подтверждает отсутствие напряжения перед началом работ?",
+            options: [
+              "Обычная однополюсная индикаторная отвертка",
+              "Двухполюсный указатель напряжения (УНН)",
+              "Визуальный осмотр рубильника"
+            ],
+            correct: 1
+          },
+          {
+            question: "Какая надпись должна быть на плакате, вывешиваемом на отключенный автомат?",
+            options: [
+              "ВНИМАНИЕ! ОПАСНО!",
+              "НЕ ВКЛЮЧАТЬ! РАБОТАЮТ ЛЮДИ",
+              "ВЫКЛЮЧЕНО"
+            ],
+            correct: 1
+          }
+        ]
+      },
+      {
+        id: "lec-2",
+        title: "2. Расчет сечения кабеля и подбор автоматов",
+        category: "Расчеты и Электротехника",
+        duration: 20,
+        takeaways: [
+          "Сечение кабеля выбирается по длительно допустимому току и мощности нагрузки.",
+          "Номинал автомата защищает кабель, а не подключенную бытовую технику!",
+          "Медный кабель 3х2.5 мм² защищается автоматом не более 16А."
+        ],
+        content: `
+          <p class="text-slate-300">Главное правило электромонтажника: <strong>автоматический выключатель защищает КАБЕЛЬ от перегрева и возгорания</strong>.</p>
+          
+          <h3 class="text-lg font-bold text-amber-400 mt-4 mb-2">Стандартная селективность для жилых помещений:</h3>
+          <div class="overflow-x-auto my-4">
+            <table class="w-full text-left text-xs border-collapse">
+              <thead>
+                <tr class="bg-slate-900 border-b border-slate-800 text-amber-400">
+                  <th class="p-3">Назначение линии</th>
+                  <th class="p-3">Сечение (Медь ВВГнг-LS)</th>
+                  <th class="p-3">Автоматический выключатель</th>
+                  <th class="p-3">Макс. Мощность (220 В)</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800 text-slate-300">
+                <tr>
+                  <td class="p-3 font-medium">Освещение</td>
+                  <td class="p-3 font-mono">3 × 1.5 мм²</td>
+                  <td class="p-3 font-semibold text-amber-400">10А (Характеристика B/C)</td>
+                  <td class="p-3">до 2.2 кВт</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-medium">Розеточные группы</td>
+                  <td class="p-3 font-mono">3 × 2.5 мм²</td>
+                  <td class="p-3 font-semibold text-amber-400">16А (Характеристика B/C)</td>
+                  <td class="p-3">до 3.5 кВт</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-medium">Варочная панель / Плита</td>
+                  <td class="p-3 font-mono">3 × 6.0 мм²</td>
+                  <td class="p-3 font-semibold text-amber-400">32А (Характеристика C)</td>
+                  <td class="p-3">до 7.0 кВт</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3 class="text-lg font-bold text-amber-400 mt-4 mb-2">Формула токовой нагрузки:</h3>
+          <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 font-mono text-sm text-center text-amber-300">
+            I = P / (U × cos φ)
+          </div>
+          <p class="text-xs text-slate-400 mt-2">Где I — ток (Амперы), P — мощность (Ватты), U — напряжение (220 В).</p>
+        `,
+        completed: false,
+        quiz: [
+          {
+            question: "Что именно защищает автоматический выключатель в щитке?",
+            options: [
+              "Подключенный в розетку телевизор или холодильник",
+              "Электропроводку (кабель) от перегрева и короткого замыкания",
+              "Человека от удара током при прикосновении"
+            ],
+            correct: 1
+          },
+          {
+            question: "Каким автоматом разрешено защищать стандартную розеточную линию с кабелем ВВГнг-LS 3х2.5 мм²?",
+            options: [
+              "Автоматом на 25 Ампер",
+              "Автоматом не более 16 Ампер",
+              "Автоматом на 40 Ампер"
+            ],
+            correct: 1
+          }
+        ]
+      },
+      {
+        id: "lec-3",
+        title: "3. Схемы подключения розеток и однополюсных выключателей",
+        category: "Схемы и Подключения",
+        duration: 25,
+        takeaways: [
+          "Выключатель ВСЕГДА разрывает фазный провод (L), а не нулевой (N).",
+          "Заземляющий проводник (PE, желто-зеленый) нельзя разрывать или использовать как рабочий ноль.",
+          "В распредкоробках используйте надежные клеммники WAGO или гильзовку (ГМЛ)."
+        ],
+        content: `
+          <p class="text-slate-300">Грамотное соединение проводов в распредкоробках и подрозетниках — залог долговечной и безопасной эксплуатации сети.</p>
+          
+          <h3 class="text-lg font-bold text-amber-400 mt-4 mb-2">Цветовая маркировка жил по ГОСТ:</h3>
+          <ul class="space-y-2 text-slate-300 bg-slate-900/60 p-4 rounded-xl border border-slate-800">
+            <li class="flex items-center"><span class="w-3 h-3 rounded-full bg-brown-500 bg-amber-700 mr-2"></span> <strong>Фаза (L):</strong> Коричневый, белый или черный провод.</li>
+            <li class="flex items-center"><span class="w-3 h-3 rounded-full bg-blue-500 mr-2"></span> <strong>Ноль рабочий (N):</strong> Синий или голубой провод.</li>
+            <li class="flex items-center"><span class="w-3 h-3 rounded-full bg-yellow-400 mr-2"></span> <strong>Заземление (PE):</strong> Желто-зеленый провод.</li>
+          </ul>
+
+          <h3 class="text-lg font-bold text-amber-400 mt-6 mb-2">Схема: Подключение одноклавишного выключателя</h3>
+          <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 font-mono text-xs text-slate-300 overflow-x-auto">
+<pre class="text-amber-400 font-bold">
+[ Ввод от щита: L (Фаза), N (Ноль), PE (Земля) ]
+             │
+             ▼
+   ╔══════════════════════════════════════╗
+   ║        Распределительная Коробка    ║
+   ║                                      ║
+   ║  Фаза (L) ───────► к Выключателю     ║
+   ║  Возврат Фазы ───► к Светильнику     ║
+   ║  Ноль (N) ────────► к Светильнику    ║
+   ║  Земля (PE) ──────► к Светильнику    ║
+   ╚══════════════════════════════════════╝
+</pre>
+          </div>
+          <p class="text-xs text-slate-400 mt-2">При коммутации фазы выключателем светильник обесточивается полностью, что позволяет безопасно менять лампочку.</p>
+        `,
+        completed: false,
+        quiz: [
+          {
+            question: "Какой провод обязан коммутировать (разрывать) однополюсный выключатель света?",
+            options: [
+              "Нулевой провод (N)",
+              "Заземляющий провод (PE)",
+              "Фазный провод (L)"
+            ],
+            correct: 2
+          },
+          {
+            question: "Какой цвет провода по стандарту соответствует защитному заземлению (PE)?",
+            options: [
+              "Синий",
+              "Желто-зеленый",
+              "Белый"
+            ],
+            correct: 1
+          }
+        ]
+      }
+    ];
+
+    let lectures = [];
+    let activeLectureId = null;
+    let selectedCategory = 'all';
+
+    // Application Initialization
+    window.onload = function() {
+      loadLecturesFromStorage();
+      renderCategoryFilters();
+      renderCatalog();
+      updateGlobalProgress();
+    };
+
+    // Load Data
+    function loadLecturesFromStorage() {
+      const stored = localStorage.getItem('electro_lectures_data');
+      if (stored) {
+        try {
+          lectures = JSON.parse(stored);
+        } catch(e) {
+          console.error("Failed to parse local lectures", e);
+          lectures = [...initialLectures];
+        }
+      } else {
+        lectures = [...initialLectures];
+        saveLecturesToStorage();
+      }
+    }
+
+    function saveLecturesToStorage() {
+      localStorage.setItem('electro_lectures_data', JSON.stringify(lectures));
+    }
+
+    // Category Filter Rendering
+    function renderCategoryFilters() {
+      const categories = ['all', ...new Set(lectures.map(l => l.category))];
+      const navContainer = document.getElementById('category-filters');
+      
+      navContainer.innerHTML = categories.map(cat => {
+        const isActive = selectedCategory === cat;
+        const count = cat === 'all' ? lectures.length : lectures.filter(l => l.category === cat).length;
+        const label = cat === 'all' ? 'Все лекции' : cat;
+
+        return `
+          <button onclick="selectCategory('${cat}')" class="flex items-center justify-between px-3 py-2 rounded-xl transition text-left text-xs font-medium ${isActive ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30' : 'text-slate-400 hover:bg-slate-900 hover:text-slate-200'}">
+            <span class="truncate">${label}</span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full ${isActive ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-slate-900 text-slate-500'}">${count}</span>
+          </button>
+        `;
+      }).join('');
+
+      document.getElementById('lectures-count-badge').innerText = lectures.length;
+    }
+
+    function selectCategory(cat) {
+      selectedCategory = cat;
+      renderCategoryFilters();
+      renderCatalog();
+    }
+
+    // Catalog Rendering
+    function renderCatalog() {
+      const query = document.getElementById('search-input').value.toLowerCase().trim();
+      const grid = document.getElementById('lectures-grid');
+      const emptyState = document.getElementById('empty-state');
+
+      const filtered = lectures.filter(lec => {
+        const matchesCat = selectedCategory === 'all' || lec.category === selectedCategory;
+        const matchesQuery = lec.title.toLowerCase().includes(query) || lec.category.toLowerCase().includes(query);
+        return matchesCat && matchesQuery;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      grid.innerHTML = filtered.map(lec => `
+        <div onclick="openLecture('${lec.id}')" class="bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-amber-500/50 rounded-2xl p-5 transition cursor-pointer flex flex-col justify-between group relative shadow-md">
+          ${lec.completed ? '<div class="absolute top-4 right-4 text-emerald-400 text-sm" title="Изучено"><i class="fa-solid fa-circle-check"></i></div>' : ''}
+          <div>
+            <div class="flex items-center space-x-2 text-xs text-amber-400 font-semibold mb-2">
+              <span class="bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">${lec.category}</span>
+              <span class="text-slate-500">•</span>
+              <span class="text-slate-400"><i class="fa-regular fa-clock mr-1"></i>${lec.duration} мин</span>
+            </div>
+            <h3 class="text-base font-bold text-slate-100 group-hover:text-amber-400 transition leading-snug line-clamp-2">${lec.title}</h3>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
+            <span>Вопросов: ${lec.quiz ? lec.quiz.length : 0}</span>
+            <span class="text-amber-400 group-hover:translate-x-1 transition flex items-center font-semibold">
+              Читать <i class="fa-solid fa-arrow-right ml-1 text.xs"></i>
+            </span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function filterLectures() {
+      renderCatalog();
+    }
+
+    function openLecture(id) {
+      const lec = lectures.find(l => l.id === id);
+      if (!lec) return;
+
+      activeLectureId = id;
+
+      document.getElementById('catalog-view').classList.add('hidden');
+      document.getElementById('reader-view').classList.remove('hidden');
+      document.getElementById('reader-view').classList.add('flex');
+
+      document.getElementById('reader-title').innerText = lec.title;
+      document.getElementById('reader-category').innerText = lec.category;
+      document.getElementById('reader-duration').innerHTML = `<i class="fa-regular fa-clock mr-1"></i> ${lec.duration} мин`;
+      document.getElementById('reader-content').innerHTML = lec.content;
+
+      // Key Takeaways
+      const takeawaysList = document.getElementById('reader-takeaways');
+      if (lec.takeaways && lec.takeaways.length > 0) {
+        document.getElementById('reader-takeaways-container').classList.remove('hidden');
+        takeawaysList.innerHTML = lec.takeaways.map(t => `<li>${t}</li>`).join('');
+      } else {
+        document.getElementById('reader-takeaways-container').classList.add('hidden');
+      }
+
+      // Quiz
+      renderQuiz(lec);
+
+      // Complete toggle button state
+      updateCompleteButtonState(lec.completed);
+    }
+
+    function showCatalogView() {
+      activeLectureId = null;
+      document.getElementById('reader-view').classList.add('hidden');
+      document.getElementById('reader-view').classList.remove('flex');
+      document.getElementById('catalog-view').classList.remove('hidden');
+      renderCatalog();
+    }
+
+    function updateCompleteButtonState(isCompleted) {
+      const btn = document.getElementById('toggle-complete-btn');
+      if (isCompleted) {
+        btn.className = "inline-flex items-center text-xs font-semibold px-3 py-1.5 rounded-lg border bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20 transition";
+        btn.innerHTML = `<i class="fa-solid fa-circle-check mr-1.5"></i> Изучено`;
+      } else {
+        btn.className = "inline-flex items-center text-xs font-semibold px-3 py-1.5 rounded-lg border bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700 transition";
+        btn.innerHTML = `<i class="fa-regular fa-circle mr-1.5"></i> Отметить пройденной`;
+      }
+    }
+
+    function toggleCurrentLectureComplete() {
+      if (!activeLectureId) return;
+      const lec = lectures.find(l => l.id === activeLectureId);
+      if (lec) {
+        lec.completed = !lec.completed;
+        saveLecturesToStorage();
+        updateCompleteButtonState(lec.completed);
+        updateGlobalProgress();
+        showToast(lec.completed ? "Лекция отмечена как пройденная!" : "Статус лекции сброшен");
+      }
+    }
+
+    // Quiz Execution Logic
+    function renderQuiz(lec) {
+      const container = document.getElementById('quiz-questions-list');
+      const resultBox = document.getElementById('quiz-result-message');
+      resultBox.classList.add('hidden');
+
+      if (!lec.quiz || lec.quiz.length === 0) {
+        document.getElementById('reader-quiz-container').classList.add('hidden');
+        return;
+      }
+
+      document.getElementById('reader-quiz-container').classList.remove('hidden');
+
+      container.innerHTML = lec.quiz.map((q, qIndex) => `
+        <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl space-y-2">
+          <p class="text-xs sm:text-sm font-bold text-slate-200">${qIndex + 1}. ${q.question}</p>
+          <div class="space-y-1.5 pt-1">
+            ${q.options.map((opt, optIndex) => `
+              <label class="flex items-center space-x-3 p-2 rounded-lg bg-slate-950/60 border border-slate-800/80 hover:border-slate-700 cursor-pointer text-xs text-slate-300 transition">
+                <input type="radio" name="quiz-q-${qIndex}" value="${optIndex}" class="accent-amber-500">
+                <span>${opt}</span>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function checkQuizAnswers() {
+      const lec = lectures.find(l => l.id === activeLectureId);
+      if (!lec || !lec.quiz) return;
+
+      let correctCount = 0;
+      let total = lec.quiz.length;
+
+      lec.quiz.forEach((q, qIndex) => {
+        const selected = document.querySelector(`input[name="quiz-q-${qIndex}"]:checked`);
+        if (selected && parseInt(selected.value) === q.correct) {
+          correctCount++;
+        }
+      });
+
+      const resultBox = document.getElementById('quiz-result-message');
+      resultBox.classList.remove('hidden');
+
+      if (correctCount === total) {
+        resultBox.className = "mt-4 p-4 rounded-xl text-sm font-semibold bg-emerald-500/10 border border-emerald-500/30 text-emerald-400";
+        resultBox.innerHTML = `<i class="fa-solid fa-award mr-2"></i> Отлично! Все ответы верны (${correctCount}/${total}). Тест пройден!`;
+        
+        // Auto mark complete
+        if (!lec.completed) {
+          lec.completed = true;
+          saveLecturesToStorage();
+          updateCompleteButtonState(true);
+          updateGlobalProgress();
+        }
+      } else {
+        resultBox.className = "mt-4 p-4 rounded-xl text-sm font-semibold bg-amber-500/10 border border-amber-500/30 text-amber-400";
+        resultBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation mr-2"></i> Вы ответили верно на ${correctCount} из ${total} вопросов. Попробуйте еще раз.`;
+      }
+    }
+
+    function updateGlobalProgress() {
+      const total = lectures.length;
+      const completed = lectures.filter(l => l.completed).length;
+      const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+      document.getElementById('global-progress-text').innerText = `${completed} / ${total}`;
+      document.getElementById('global-progress-bar').style.width = `${percent}%`;
+    }
+
+    function openAddModal(lectureToEdit = null) {
+      const modal = document.getElementById('lecture-modal');
+      const form = document.getElementById('lecture-form');
+      const quizContainer = document.getElementById('form-quiz-questions');
+      
+      form.reset();
+      quizContainer.innerHTML = '';
+
+      if (lectureToEdit) {
+        document.getElementById('modal-title').innerHTML = `<i class="fa-solid fa-pen-to-square text-amber-400 mr-2"></i> Редактирование лекции`;
+        document.getElementById('form-lecture-id').value = lectureToEdit.id;
+        document.getElementById('form-title').value = lectureToEdit.title;
+        document.getElementById('form-category').value = lectureToEdit.category;
+        document.getElementById('form-duration').value = lectureToEdit.duration;
+        document.getElementById('form-takeaways').value = lectureToEdit.takeaways ? lectureToEdit.takeaways.join('\n') : '';
+        document.getElementById('form-content').value = lectureToEdit.content;
+
+        if (lectureToEdit.quiz) {
+          lectureToEdit.quiz.forEach(q => addQuizQuestionField(q));
+        }
+      } else {
+        document.getElementById('modal-title').innerHTML = `<i class="fa-solid fa-plus text-amber-400 mr-2"></i> Добавление лекции`;
+        document.getElementById('form-lecture-id').value = '';
+        addQuizQuestionField(); // Add 1 blank question by default
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeAddModal() {
+      document.getElementById('lecture-modal').classList.add('hidden');
+    }
+
+    function addQuizQuestionField(data = null) {
+      const container = document.getElementById('form-quiz-questions');
+      const index = container.children.length;
+
+      const qText = data ? data.question : '';
+      const opts = data ? data.options : ['', ''];
+      const correctIndex = data ? data.correct : 0;
+
+      const card = document.createElement('div');
+      card.className = "bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2 relative";
+      card.innerHTML = `
+        <button type="button" onclick="this.parentElement.remove()" class="absolute top-2 right-2 text-slate-500 hover:text-red-400 text-xs">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+        <div>
+          <label class="block text-[11px] font-medium text-slate-400 mb-1">Вопрос №${index + 1}</label>
+          <input type="text" required placeholder="Текст вопроса" value="${qText}" class="q-text w-full bg-slate-900 text-xs rounded px-2.5 py-1.5 border border-slate-800 focus:border-amber-500">
+        </div>
+        <div class="space-y-1.5 pt-1">
+          <label class="block text-[10px] font-medium text-slate-500">Варианты ответов (отметьте правильный radio):</label>
+          ${[0, 1, 2].map(i => `
+            <div class="flex items-center space-x-2">
+              <input type="radio" name="correct-opt-${index}" value="${i}" ${i === correctIndex ? 'checked' : ''} class="q-correct accent-amber-500">
+              <input type="text" required placeholder="Вариант ${i + 1}" value="${opts[i] || ''}" class="q-opt w-full bg-slate-900 text-xs rounded px-2 py-1 border border-slate-800">
+            </div>
+          `).join('')}
+        </div>
+      `;
+      container.appendChild(card);
+    }
+
+    function saveLecture(e) {
+      e.preventDefault();
+
+      const id = document.getElementById('form-lecture-id').value || `lec-${Date.now()}`;
+      const title = document.getElementById('form-title').value.trim();
+      const category = document.getElementById('form-category').value.trim();
+      const duration = parseInt(document.getElementById('form-duration').value);
+      const takeawaysRaw = document.getElementById('form-takeaways').value.trim();
+      const content = document.getElementById('form-content').value;
+
+      const takeaways = takeawaysRaw ? takeawaysRaw.split('\n').filter(t => t.trim().length > 0) : [];
+
+      // Parse quiz
+      const quizQuestions = [];
+      const questionBlocks = document.getElementById('form-quiz-questions').children;
+
+      for (let block of questionBlocks) {
+        const text = block.querySelector('.q-text').value.trim();
+        const optInputs = block.querySelectorAll('.q-opt');
+        const options = Array.from(optInputs).map(i => i.value.trim());
+        const correctRadio = block.querySelector('.q-correct:checked');
+        const correct = correctRadio ? parseInt(correctRadio.value) : 0;
+
+        if (text && options.length > 0) {
+          quizQuestions.push({ question: text, options, correct });
+        }
+      }
+
+      const existingIndex = lectures.findIndex(l => l.id === id);
+      const newLectureData = {
+        id,
+        title,
+        category,
+        duration,
+        takeaways,
+        content,
+        completed: existingIndex !== -1 ? lectures[existingIndex].completed : false,
+        quiz: quizQuestions
+      };
+
+      if (existingIndex !== -1) {
+        lectures[existingIndex] = newLectureData;
+      } else {
+        lectures.push(newLectureData);
+      }
+
+      saveLecturesToStorage();
+      renderCategoryFilters();
+      renderCatalog();
+      updateGlobalProgress();
+      closeAddModal();
+
+      showToast("Лекция успешно сохранена!");
+
+      if (activeLectureId === id) {
+        openLecture(id);
+      }
+    }
+
+    function editCurrentLecture() {
+      if (!activeLectureId) return;
+      const lec = lectures.find(l => l.id === activeLectureId);
+      if (lec) openAddModal(lec);
+    }
+
+    function deleteCurrentLecture() {
+      if (!activeLectureId) return;
+      if (confirm("Вы уверены, что хотите удалить эту лекцию?")) {
+        lectures = lectures.filter(l => l.id !== activeLectureId);
+        saveLecturesToStorage();
+        renderCategoryFilters();
+        showCatalogView();
+        updateGlobalProgress();
+        showToast("Лекция удалена");
+      }
+    }
+
+    function exportLecturesJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(lectures, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "lectures.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showToast("Файл lectures.json сгенерирован!");
+    }
+
+    function importLecturesJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (Array.isArray(imported)) {
+            lectures = imported;
+            saveLecturesToStorage();
+            renderCategoryFilters();
+            renderCatalog();
+            updateGlobalProgress();
+            showToast("База лекций успешно обновлена!");
+          } else {
+            alert("Ошибка формата JSON: ожидает список лекций!");
+          }
+        } catch (err) {
+          alert("Не удалось прочитать JSON файл.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // Modals & UI Helpers
+    function openGithubModal() {
+      document.getElementById('github-modal').classList.remove('hidden');
+    }
+
+    function closeGithubModal() {
+      document.getElementById('github-modal').classList.add('hidden');
+    }
+
+    function copyToClipboard(text) {
+      const tempInput = document.createElement("textarea");
+      tempInput.value = text;
+      document.body.appendChild(tempInput);
+      tempInput.select();
+      document.execCommand("copy");
+      document.body.removeChild(tempInput);
+      showToast("Скопировано в буфер обмена!");
+    }
